@@ -1,9 +1,6 @@
-#!/bin/sh
+#!/usr/bin/env bash
 set -eux
 cargo build
-find target \
-  -name "librs_fsrs_c.so" \
-  -not -path "*/deps/*" \
-  -type f -print \
-  -exec env LD_LIBRARY_PATH=/home/runner/work/rs-fsrs-c/target/debug/librs_fsrs_c.so gcc examples/basic.c {} \;
-./a.out
+BASEDIR="$( cd "$( dirname "$0" )" && pwd )"
+gcc -o a.out examples/basic.c -L${BASEDIR}/target/debug/ -lrs_fsrs_c
+env LD_LIBRARY_PATH=${BASEDIR}/target/debug/ ./a.out
