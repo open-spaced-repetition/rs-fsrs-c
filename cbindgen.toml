@@ -60,7 +60,7 @@ usize_is_size_t = true
 [export]
 include = []
 exclude = []
-# prefix = "CAPI_"
+prefix = "fsrs_"
 item_types = []
 renaming_overrides_prefixing = false
 
@@ -112,7 +112,7 @@ rename_variants = "None"
 # deprecated = "DEPRECATED_ENUM"
 # deprecated_with_note = "DEPRECATED_ENUM_WITH_NOTE"
 add_sentinel = false
-prefix_with_name = false
+prefix_with_name = true
 derive_helper_methods = false
 derive_const_casts = false
 derive_mut_casts = false

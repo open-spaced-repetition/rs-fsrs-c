@@ -2,14 +2,14 @@ use chrono::DateTime;
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug)]
-pub struct fsrs_Parameters {
+pub struct Parameters {
     pub request_retention: f32,
     pub maximum_interval: i32,
     pub w: [f32; 19],
 }
 
-impl From<fsrs_Parameters> for fsrs::Parameters {
-    fn from(value: fsrs_Parameters) -> Self {
+impl From<Parameters> for fsrs::Parameters {
+    fn from(value: Parameters) -> Self {
         Self {
             request_retention: value.request_retention,
             maximum_interval: value.maximum_interval,
@@ -19,11 +19,11 @@ impl From<fsrs_Parameters> for fsrs::Parameters {
 }
 
 #[repr(C)]
-pub struct fsrs_Fsrs(*const fsrs::FSRS);
+pub struct Fsrs(*const fsrs::FSRS);
 
-impl fsrs_Fsrs {
+impl Fsrs {
     #[no_mangle]
-    pub extern "C" fn fsrs_Fsrs_new(p: fsrs_Parameters) -> Self {
+    pub extern "C" fn fsrs_Fsrs_new(p: Parameters) -> Self {
         Self(Box::into_raw(Box::new(fsrs::FSRS::new(p.into()))))
     }
     #[no_mangle]
@@ -31,23 +31,24 @@ impl fsrs_Fsrs {
         Self(Box::into_raw(Box::new(fsrs::FSRS::default())))
     }
     #[no_mangle]
-    pub extern "C" fn fsrs_schedule_timestamp(
+    pub extern "C" fn fsrs_Fsrs_schedule_timestamp(
         fsrs: *const Self,
-        card: *const fsrs_Card,
+        card: *const Card,
         now: i64,
-    ) -> fsrs_ScheduledCards {
+    ) -> ScheduledCards {
         let fsrs_inner = unsafe { &*(*fsrs).0 };
         let card_inner = unsafe { &*(*card).0 };
-        fsrs_ScheduledCards(Box::into_raw(Box::new(fsrs_inner.schedule(
+        ScheduledCards(Box::into_raw(Box::new(fsrs_inner.schedule(
             card_inner.clone(),
             DateTime::from_timestamp(now, 0).expect("err"),
         ))))
     }
 }
 #[repr(C)]
-#[derive(Clone, Copy)]
-pub struct fsrs_Card(*const fsrs::Card);
-impl fsrs_Card {
+#[derive(Clone)]
+pub struct Card(*const fsrs::Card);
+
+impl Card {
     #[no_mangle]
     pub extern "C" fn fsrs_Card_new() -> Self {
         Self(Box::into_raw(Box::new(fsrs::Card::new())))
@@ -55,26 +56,28 @@ impl fsrs_Card {
 }
 
 #[repr(C)]
-pub struct fsrs_ScheduledCards(*const fsrs::ScheduledCards);
-impl fsrs_ScheduledCards {
+pub struct ScheduledCards(*const fsrs::ScheduledCards);
+impl ScheduledCards {
     #[no_mangle]
-    pub extern "C" fn select_card(&self, r: fsrs_Rating) -> fsrs_Card {
+    pub extern "C" fn fsrs_ScheduledCards_select_card(&self, r: Rating) -> Card {
         let s = unsafe { &*(*self).0 };
-        fsrs_Card(Box::into_raw(Box::new(s.select_card(r.into()))))
+        Card(Box::into_raw(Box::new(s.select_card(r.into()))))
     }
 }
 
 #[repr(C)]
-pub enum fsrs_Rating {
+#[derive(Debug, Clone, Copy, Default)]
+pub enum Rating {
+    #[default]
     Again = 1,
     Hard = 2,
     Good = 3,
     Easy = 4,
 }
-impl From<fsrs_Rating> for fsrs::Rating {
-    fn from(value: fsrs_Rating) -> Self {
+impl From<Rating> for fsrs::Rating {
+    fn from(value: Rating) -> Self {
         use fsrs::Rating as r;
-        use fsrs_Rating::*;
+        use Rating::*;
         match value {
             Again => r::Again,
             Hard => r::Hard,
@@ -83,10 +86,10 @@ impl From<fsrs_Rating> for fsrs::Rating {
         }
     }
 }
-impl From<fsrs::Rating> for fsrs_Rating {
+impl From<fsrs::Rating> for Rating {
     fn from(value: fsrs::Rating) -> Self {
         use fsrs::Rating::*;
-        use fsrs_Rating as r;
+        use Rating as r;
         match value {
             Again => r::Again,
             Hard => r::Hard,
@@ -97,7 +100,7 @@ impl From<fsrs::Rating> for fsrs_Rating {
 }
 #[repr(C)]
 #[derive(Clone, Copy, PartialEq, Debug, Default, Eq)]
-pub enum fsrs_State {
+pub enum State {
     #[default]
     New = 0,
     Learning = 1,
@@ -105,10 +108,10 @@ pub enum fsrs_State {
     Relearning = 3,
 }
 
-impl From<fsrs_State> for fsrs::State {
-    fn from(value: fsrs_State) -> Self {
+impl From<State> for fsrs::State {
+    fn from(value: State) -> Self {
         use fsrs::State as r;
-        use fsrs_State::*;
+        use State::*;
         match value {
             New => r::New,
             Learning => r::Learning,
@@ -118,10 +121,10 @@ impl From<fsrs_State> for fsrs::State {
     }
 }
 
-impl From<fsrs::State> for fsrs_State {
+impl From<fsrs::State> for State {
     fn from(value: fsrs::State) -> Self {
         use fsrs::State::*;
-        use fsrs_State as r;
+        use State as r;
         match value {
             New => r::New,
             Learning => r::Learning,
@@ -131,25 +134,43 @@ impl From<fsrs::State> for fsrs_State {
     }
 }
 #[repr(C)]
-pub struct fsrs_ReviewLog {
-    pub rating: fsrs_Rating,
+#[derive(Debug, Clone, Default)]
+pub struct ReviewLog {
+    pub rating: Rating,
     pub elapsed_days: i64,
     pub scheduled_days: i64,
-    pub state: fsrs_State,
+    pub state: State,
     pub reviewed_date_s: i64,
 }
 
-impl fsrs_ReviewLog {
+#[repr(C)]
+#[derive(Debug, Clone)]
+pub struct Option_ReviewLog {
+    pub log: ReviewLog,
+    pub none: bool,
+}
+
+impl Option_ReviewLog {
     #[no_mangle]
-    pub extern "C" fn fsrs_get_ReviewLog(s: *const fsrs_Card) -> Self {
+    pub extern "C" fn fsrs_Card_log(s: *const Card) -> Self {
         let sc = unsafe { &*(*s).0 };
-        let log = sc.log.clone().unwrap();
-        Self {
-            elapsed_days: log.elapsed_days,
-            scheduled_days: log.scheduled_days,
-            reviewed_date_s: log.reviewed_date.timestamp(),
-            rating: log.rating.into(),
-            state: log.state.into(),
+        let log = sc.log.clone();
+        if let Some(log) = log {
+            Self {
+                log: ReviewLog {
+                    elapsed_days: log.elapsed_days,
+                    scheduled_days: log.scheduled_days,
+                    reviewed_date_s: log.reviewed_date.timestamp(),
+                    rating: log.rating.into(),
+                    state: log.state.into(),
+                },
+                none: false,
+            }
+        } else {
+            Self {
+                log: ReviewLog::default(),
+                none: true,
+            }
         }
     }
 }

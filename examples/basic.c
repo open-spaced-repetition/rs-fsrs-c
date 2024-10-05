@@ -13,17 +13,19 @@ int main(void) {
   fsrs_Fsrs F = fsrs_Fsrs_default();
   time_t t = time(NULL);
 
-  fsrs_ScheduledCards scheduled_cards = fsrs_schedule_timestamp(&F, &c, t);
-  fsrs_Rating r = Easy;
-  fsrs_Card updated_card = select_card(&scheduled_cards, r);
-  fsrs_ReviewLog log = fsrs_get_ReviewLog(&updated_card);
-
-  struct tm *lt = localtime(&log.reviewed_date_s);
+  fsrs_ScheduledCards scheduled_cards = fsrs_Fsrs_schedule_timestamp(&F, &c, t);
+  fsrs_Rating r = fsrs_Rating_Easy;
+  fsrs_Card updated_card = fsrs_ScheduledCards_select_card(&scheduled_cards, r);
+  fsrs_Option_ReviewLog option_log = fsrs_Card_log(&updated_card);
+  if (option_log.none) {
+    printf("No log\n");
+    return 0;
+  }
+  fsrs_ReviewLog log = option_log.log;
   printf("scheduled_days: %ld, elapsed_days: %ld, timestamp: %ld, rating: "
          "%d, state: %d\n",
          log.scheduled_days, log.elapsed_days, log.reviewed_date_s, log.rating,
          log.state);
-
-  puts(asctime(lt));
+  puts(asctime(localtime(&log.reviewed_date_s)));
   return 0;
 }
