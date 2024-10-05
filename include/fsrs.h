@@ -26,6 +26,20 @@ typedef struct FSRS FSRS;
 
 typedef struct ScheduledCards ScheduledCards;
 
+typedef struct fsrs_Card {
+  const struct Card *_0;
+} fsrs_Card;
+
+typedef struct fsrs_Fsrs {
+  const struct FSRS *_0;
+} fsrs_Fsrs;
+
+typedef struct fsrs_Parameters {
+  float request_retention;
+  int32_t maximum_interval;
+  float w[19];
+} fsrs_Parameters;
+
 typedef struct fsrs_ReviewLog {
   enum fsrs_Rating rating;
   int64_t elapsed_days;
@@ -34,28 +48,22 @@ typedef struct fsrs_ReviewLog {
   int64_t reviewed_date_s;
 } fsrs_ReviewLog;
 
-typedef struct fsrs_card {
-  const struct Card *inner;
-} fsrs_card;
-
-typedef struct fsrs_fsrs {
-  const struct FSRS *inner;
-} fsrs_fsrs;
-
 typedef struct fsrs_ScheduledCards {
-  const struct ScheduledCards *inner;
+  const struct ScheduledCards *_0;
 } fsrs_ScheduledCards;
 
-struct fsrs_ReviewLog fsrs_ReviewLog_log(const struct fsrs_card *s);
+struct fsrs_Card fsrs_Card_new(void);
 
-struct fsrs_card fsrs_card_new(void);
+struct fsrs_Fsrs fsrs_Fsrs_default(void);
 
-struct fsrs_fsrs fsrs_fsrs_new(void);
+struct fsrs_Fsrs fsrs_Fsrs_new(struct fsrs_Parameters p);
 
-struct fsrs_ScheduledCards fsrs_schedule_s(const struct fsrs_fsrs *fsrs,
-                                           const struct fsrs_card *card,
-                                           int64_t now);
+struct fsrs_ReviewLog fsrs_get_ReviewLog(const struct fsrs_Card *s);
 
-struct fsrs_card select_card(const struct fsrs_ScheduledCards *self, enum fsrs_Rating r);
+struct fsrs_ScheduledCards fsrs_schedule_timestamp(const struct fsrs_Fsrs *fsrs,
+                                                   const struct fsrs_Card *card,
+                                                   int64_t now);
+
+struct fsrs_Card select_card(const struct fsrs_ScheduledCards *self, enum fsrs_Rating r);
 
 #endif  /* _FSRS_H */
