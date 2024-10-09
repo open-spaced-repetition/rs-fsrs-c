@@ -132,14 +132,7 @@ impl SchedulingInfo {
     #[no_mangle]
     pub extern "C" fn fsrs_SchedulingInfo_review_log(&self) -> ReviewLog {
         let s = unsafe { &*(*self).0 };
-        let log = s.review_log.clone();
-        ReviewLog {
-            elapsed_days: log.elapsed_days,
-            scheduled_days: log.scheduled_days,
-            reviewed_date_s: log.reviewed_date.timestamp(),
-            rating: log.rating.into(),
-            state: log.state.into(),
-        }
+        ReviewLog(to_raw(s.review_log.clone()))
     }
 }
 
@@ -212,11 +205,37 @@ impl From<fsrs::State> for State {
     }
 }
 #[repr(C)]
-#[derive(Debug, Clone, Default)]
-pub struct ReviewLog {
-    pub rating: Rating,
-    pub elapsed_days: i64,
-    pub scheduled_days: i64,
-    pub state: State,
-    pub reviewed_date_s: i64,
+#[derive(Debug, Clone)]
+pub struct ReviewLog(*const fsrs::ReviewLog);
+
+impl ReviewLog {
+    #[no_mangle]
+    pub extern "C" fn fsrs_ReviewLog_rating(&self) -> Rating {
+        let r = unsafe { &*(*self).0 };
+        r.rating.into()
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fsrs_ReviewLog_elapsed_days(&self) -> i64 {
+        let r = unsafe { &*(*self).0 };
+        r.elapsed_days
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fsrs_ReviewLog_scheduled_days(&self) -> i64 {
+        let r = unsafe { &*(*self).0 };
+        r.scheduled_days
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fsrs_ReviewLog_state(&self) -> State {
+        let r = unsafe { &*(*self).0 };
+        r.state.into()
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fsrs_ReviewLog_reviewed_date(&self) -> i64 {
+        let r = unsafe { &*(*self).0 };
+        r.reviewed_date.timestamp()
+    }
 }
