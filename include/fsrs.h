@@ -48,17 +48,13 @@ typedef struct fsrs_RecordLog {
   const struct fsrs_RecordLog *_0;
 } fsrs_RecordLog;
 
+typedef struct fsrs_ReviewLog {
+  const struct fsrs_ReviewLog *_0;
+} fsrs_ReviewLog;
+
 typedef struct fsrs_SchedulingInfo {
   const struct fsrs_SchedulingInfo *_0;
 } fsrs_SchedulingInfo;
-
-typedef struct fsrs_ReviewLog {
-  enum fsrs_Rating rating;
-  int64_t elapsed_days;
-  int64_t scheduled_days;
-  enum fsrs_State state;
-  int64_t reviewed_date_s;
-} fsrs_ReviewLog;
 
 double fsrs_Card_difficulty(const struct fsrs_Card *self);
 
@@ -87,6 +83,16 @@ struct fsrs_Fsrs fsrs_Fsrs_new(struct fsrs_Parameters p);
 struct fsrs_RecordLog fsrs_Fsrs_repeat_timestamp(const struct fsrs_Fsrs *fsrs,
                                                  const struct fsrs_Card *card,
                                                  int64_t now);
+
+int64_t fsrs_ReviewLog_elapsed_days(const struct fsrs_ReviewLog *self);
+
+enum fsrs_Rating fsrs_ReviewLog_rating(const struct fsrs_ReviewLog *self);
+
+int64_t fsrs_ReviewLog_reviewed_date(const struct fsrs_ReviewLog *self);
+
+int64_t fsrs_ReviewLog_scheduled_days(const struct fsrs_ReviewLog *self);
+
+enum fsrs_State fsrs_ReviewLog_state(const struct fsrs_ReviewLog *self);
 
 struct fsrs_SchedulingInfo fsrs_ScheduledCards_get(const struct fsrs_RecordLog *self,
                                                    enum fsrs_Rating r);

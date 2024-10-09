@@ -25,15 +25,18 @@ int main(void) {
     fsrs_SchedulingInfo scheduling_info =
         fsrs_ScheduledCards_get(&scheduled_cards, rating);
     fsrs_Card card = fsrs_SchedulingInfo_card(&scheduling_info);
-    fsrs_ReviewLog log = fsrs_SchedulingInfo_review_log(&scheduling_info);
-
-    printf("scheduled_days: %" PRId64 "\nelapsed_days: %" PRId64
-           "\ndate: %s"
+    fsrs_ReviewLog review_log =
+        fsrs_SchedulingInfo_review_log(&scheduling_info);
+    time_t reviewed_date = fsrs_ReviewLog_reviewed_date(&review_log);
+    printf("scheduled_days: %" PRId64 "\nelapsed_days: %" PRId64 "\ndate: %s"
            "rating: %d"
            "\nstate: %d"
            "\n",
-           log.scheduled_days, log.elapsed_days,
-           asctime(localtime(&log.reviewed_date_s)), log.rating, log.state);
+           fsrs_ReviewLog_scheduled_days(&review_log),
+           fsrs_ReviewLog_elapsed_days(&review_log),
+           asctime(localtime(&reviewed_date)),
+           fsrs_ReviewLog_rating(&review_log),
+           fsrs_ReviewLog_state(&review_log));
     printf("card:\n  elapsed_days: %ld\n  scheduled_days: %ld\n  due: %ld\n  "
            "stability: %f\n  difficulty: %f\n  reps: %d\n  lapses: %d\n  "
            "state: %u\n  last_review: %ld\n",
