@@ -8,7 +8,7 @@ see [example](./examples/basic.c)
 
 ## Development
 
-see [build.sh](./build.sh), currently only on linux.
+see [build.sh](./build.sh)
 
 ## Name conversion
 
