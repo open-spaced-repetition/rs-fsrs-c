@@ -1,10 +1,11 @@
 #include "../include/fsrs.h"
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <time.h>
 
 int main(void) {
-  fsrs_Fsrs F1 = fsrs_Fsrs_new(
+  fsrs_Fsrs _F1 = fsrs_Fsrs_new(
       (fsrs_Parameters){.maximum_interval = 36000,
                         .request_retention = 0.9,
                         .w = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
@@ -26,8 +27,11 @@ int main(void) {
     fsrs_Card card = fsrs_SchedulingInfo_card(&scheduling_info);
     fsrs_ReviewLog log = fsrs_SchedulingInfo_review_log(&scheduling_info);
 
-    printf("scheduled_days: %ld\nelapsed_days: %ld\ndate: %srating: %d\nstate: "
-           "%d\n",
+    printf("scheduled_days: %" PRId64 "\nelapsed_days: %" PRId64
+           "\ndate: %s"
+           "rating: %d"
+           "\nstate: %d"
+           "\n",
            log.scheduled_days, log.elapsed_days,
            asctime(localtime(&log.reviewed_date_s)), log.rating, log.state);
     printf("card:\n  elapsed_days: %ld\n  scheduled_days: %ld\n  due: %ld\n  "
