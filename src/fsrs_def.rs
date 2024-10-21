@@ -1,4 +1,4 @@
-use chrono::{DateTime, Utc};
+use chrono::DateTime;
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug)]
