@@ -12,6 +12,6 @@ gcc \
 env LD_LIBRARY_PATH=$PWD/target/debug/ ./a.out
 
 if [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
-    gcov a-basic.gcno a-basic.gcda
+    env LD_LIBRARY_PATH=$PWD/target/debug/ gcov a-basic.gcno a-basic.gcda
     cat basic.c.gcov
 fi
