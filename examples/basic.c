@@ -5,7 +5,7 @@
 #include <time.h>
 
 int main(void) {
-  fsrs_Fsrs _F1 = fsrs_Fsrs_new(
+  fsrs_Fsrs F = fsrs_Fsrs_new(
       (fsrs_Parameters){.maximum_interval = 36000,
                         .request_retention = 0.9,
                         .w = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
@@ -13,21 +13,21 @@ int main(void) {
                         .decay = 0.0,
                         .factor = 0.0,
                         .enable_short_term = false});
-  fsrs_Card c = fsrs_Card_new();
-  fsrs_Fsrs F = fsrs_Fsrs_default();
-  time_t t = time(NULL);
+  const fsrs_Card c = fsrs_Card_new();
+  F = fsrs_Fsrs_default();
+  const time_t t = time(NULL);
 
-  fsrs_RecordLog scheduled_cards = fsrs_Fsrs_repeat_timestamp(&F, &c, t);
+  const fsrs_RecordLog scheduled_cards = fsrs_Fsrs_repeat_timestamp(&F, &c, t);
   const fsrs_Rating ratings[] = {fsrs_Rating_Again, fsrs_Rating_Hard,
                                  fsrs_Rating_Good, fsrs_Rating_Easy};
   for (int i = 0; i < 4; i++) {
-    fsrs_Rating rating = ratings[i];
-    fsrs_SchedulingInfo scheduling_info =
+    const fsrs_Rating rating = ratings[i];
+    const fsrs_SchedulingInfo scheduling_info =
         fsrs_ScheduledCards_get(&scheduled_cards, rating);
-    fsrs_Card card = fsrs_SchedulingInfo_card(&scheduling_info);
-    fsrs_ReviewLog review_log =
+    const fsrs_Card card = fsrs_SchedulingInfo_card(&scheduling_info);
+    const fsrs_ReviewLog review_log =
         fsrs_SchedulingInfo_review_log(&scheduling_info);
-    time_t reviewed_date = fsrs_ReviewLog_reviewed_date(&review_log);
+    const time_t reviewed_date = fsrs_ReviewLog_reviewed_date(&review_log);
     printf("scheduled_days: %" PRId64 "\n"
            "elapsed_days: %" PRId64 "\n"
            "date: %s"
