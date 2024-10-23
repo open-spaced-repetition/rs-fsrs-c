@@ -1,2 +1,7 @@
 /target
 *.out
+*.gcda
+*.gcno
+*.gz
+*.json
+*.gcov

@@ -28,18 +28,26 @@ int main(void) {
     fsrs_ReviewLog review_log =
         fsrs_SchedulingInfo_review_log(&scheduling_info);
     time_t reviewed_date = fsrs_ReviewLog_reviewed_date(&review_log);
-    printf("scheduled_days: %" PRId64 "\nelapsed_days: %" PRId64 "\ndate: %s"
-           "rating: %d"
-           "\nstate: %d"
-           "\n",
+    printf("scheduled_days: %" PRId64 "\n"
+           "elapsed_days: %" PRId64 "\n"
+           "date: %s"
+           "rating: %" PRId32 "\n"
+           "\nstate: %" PRId32 "\n",
            fsrs_ReviewLog_scheduled_days(&review_log),
            fsrs_ReviewLog_elapsed_days(&review_log),
            asctime(localtime(&reviewed_date)),
            fsrs_ReviewLog_rating(&review_log),
            fsrs_ReviewLog_state(&review_log));
-    printf("card:\n  elapsed_days: %ld\n  scheduled_days: %ld\n  due: %ld\n  "
-           "stability: %f\n  difficulty: %f\n  reps: %d\n  lapses: %d\n  "
-           "state: %u\n  last_review: %ld\n",
+    printf("card:\n"
+           "  elapsed_days: %" PRId64 "\n"
+           "  scheduled_days: %" PRId64 "\n"
+           "  due: %" PRId64 "\n"
+           "  stability: %f\n"
+           "  difficulty: %f\n"
+           "  reps: %" PRId32 "\n"
+           "  lapses: %" PRId32 "\n"
+           "  state: %" PRIu32 "\n"
+           "  last_review: %" PRId64 "\n",
            fsrs_Card_elapsed_days(&card), fsrs_Card_scheduled_days(&card),
            fsrs_Card_due(&card), fsrs_Card_stability(&card),
            fsrs_Card_difficulty(&card), fsrs_Card_reps(&card),
