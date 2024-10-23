@@ -27,4 +27,5 @@ jobs:
             ${{ runner.os }}-rust-release
 
       - name: Run checks
+        shell: bash
         run: ./build.sh
