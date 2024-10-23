@@ -28,11 +28,12 @@ int main(void) {
     const fsrs_ReviewLog review_log =
         fsrs_SchedulingInfo_review_log(&scheduling_info);
     const time_t reviewed_date = fsrs_ReviewLog_reviewed_date(&review_log);
-    printf("scheduled_days: %" PRId64 "\n"
-           "elapsed_days: %" PRId64 "\n"
-           "date: %s"
-           "rating: %" PRId32 "\n"
-           "\nstate: %" PRId32 "\n",
+    printf("review_log:\n"
+           "  scheduled_days: %" PRId64 "\n"
+           "  elapsed_days: %" PRId64 "\n"
+           "  date: %s"
+           "  rating: %" PRId32 "\n"
+           "  state: %" PRId32 "\n",
            fsrs_ReviewLog_scheduled_days(&review_log),
            fsrs_ReviewLog_elapsed_days(&review_log),
            asctime(localtime(&reviewed_date)),
@@ -53,6 +54,6 @@ int main(void) {
            fsrs_Card_difficulty(&card), fsrs_Card_reps(&card),
            fsrs_Card_lapses(&card), fsrs_Card_state(&card),
            fsrs_Card_last_review(&card));
-    return 0;
   }
+  return 0;
 }
