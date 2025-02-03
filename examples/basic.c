@@ -5,15 +5,17 @@
 #include <time.h>
 
 int main(void) {
-  fsrs_Fsrs F = fsrs_Fsrs_new(
-      (fsrs_Parameters){.maximum_interval = 36000,
-                        .request_retention = 0.9,
-                        .w = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-                              0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
-                        .decay = 0.0,
-                        .factor = 0.0,
-                        .enable_short_term = false,
-                        .enable_fuzz = false});
+  fsrs_Fsrs F = fsrs_Fsrs_new((fsrs_Parameters){
+      .maximum_interval = 36000,
+      .request_retention = 0.9,
+      .w = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+            0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
+      .decay = 0.0,
+      .factor = 0.0,
+      .enable_short_term = false,
+      .enable_fuzz = true,
+      .seed = "foo" // or can be NULL
+  });
   const fsrs_Card c = fsrs_Card_new();
   F = fsrs_Fsrs_default();
   const time_t t = time(NULL);

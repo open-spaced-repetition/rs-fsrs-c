@@ -1,16 +1,10 @@
 use chrono::DateTime;
 use rs_fsrs as fsrs;
+use std::ffi::CStr;
+use std::os::raw::c_char;
 
 #[repr(C)]
-#[derive(Clone, Debug)]
-pub enum Seed {
-   // String(String), # FIXME: error: `extern` fn uses type `std::string::String`, which is not FFI-safe
-    Empty,
-    Default,
-}
-
-#[repr(C)]
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct Parameters {
     pub request_retention: f64,
     pub maximum_interval: i32,
@@ -19,7 +13,7 @@ pub struct Parameters {
     pub factor: f64,
     pub enable_short_term: bool,
     pub enable_fuzz: bool,
-    pub seed: Seed,
+    pub seed: *const c_char,
 }
 
 fn to_raw<T>(value: T) -> *const T {
@@ -36,9 +30,15 @@ impl From<Parameters> for fsrs::Parameters {
             factor: value.factor,
             enable_short_term: value.enable_short_term,
             enable_fuzz: value.enable_fuzz,
-            seed: match value.seed{
-                Seed::Empty => fsrs::Seed::Empty,
-                Seed::Default => fsrs::Seed::Default,
+            seed: if value.seed.is_null() {
+                fsrs::Seed::Default
+            } else {
+                fsrs::Seed::String(
+                    unsafe { CStr::from_ptr(value.seed) }
+                        .to_str()
+                        .unwrap()
+                        .to_string(),
+                )
             },
         }
     }
@@ -62,10 +62,8 @@ impl Fsrs {
         card: *const Card,
         now: i64,
     ) -> RecordLog {
-        let fsrs_inner = unsafe { &*(*fsrs).0 };
-        let card_inner = unsafe { &*(*card).0 };
-        RecordLog(to_raw(fsrs_inner.repeat(
-            card_inner.clone(),
+        RecordLog(to_raw(unsafe { &*(*fsrs).0 }.repeat(
+            unsafe { &*(*card).0 }.clone(),
             DateTime::from_timestamp(now, 0).expect("err"),
         )))
     }
@@ -81,48 +79,40 @@ impl Card {
     }
     #[no_mangle]
     pub extern "C" fn fsrs_Card_due(&self) -> i64 {
-        let c = unsafe { &*(*self).0 };
-        c.due.timestamp()
+        unsafe { &*(*self).0 }.due.timestamp()
     }
     #[no_mangle]
     pub extern "C" fn fsrs_Card_stability(&self) -> f64 {
-        let c = unsafe { &*(*self).0 };
-        c.stability
+        unsafe { &*(*self).0 }.stability
     }
     #[no_mangle]
     pub extern "C" fn fsrs_Card_difficulty(&self) -> f64 {
-        let c = unsafe { &*(*self).0 };
-        c.difficulty
+        unsafe { &*(*self).0 }.difficulty
     }
     #[no_mangle]
     pub extern "C" fn fsrs_Card_elapsed_days(&self) -> i64 {
-        let c = unsafe { &*(*self).0 };
-        c.elapsed_days
+        unsafe { &*(*self).0 }.elapsed_days
     }
     #[no_mangle]
     pub extern "C" fn fsrs_Card_scheduled_days(&self) -> i64 {
-        let c = unsafe { &*(*self).0 };
-        c.scheduled_days
+        unsafe { &*(*self).0 }.scheduled_days
     }
+
     #[no_mangle]
     pub extern "C" fn fsrs_Card_reps(&self) -> i32 {
-        let c = unsafe { &*(*self).0 };
-        c.reps
+        unsafe { &*(*self).0 }.reps
     }
     #[no_mangle]
     pub extern "C" fn fsrs_Card_lapses(&self) -> i32 {
-        let c = unsafe { &*(*self).0 };
-        c.lapses
+        unsafe { &*(*self).0 }.lapses
     }
     #[no_mangle]
     pub extern "C" fn fsrs_Card_state(&self) -> State {
-        let c = unsafe { &*(*self).0 };
-        c.state.into()
+        unsafe { &*(*self).0 }.state.into()
     }
     #[no_mangle]
     pub extern "C" fn fsrs_Card_last_review(&self) -> i64 {
-        let c = unsafe { &*(*self).0 };
-        c.last_review.timestamp()
+        unsafe { &*(*self).0 }.last_review.timestamp()
     }
 }
 
@@ -131,8 +121,9 @@ pub struct RecordLog(*const fsrs::RecordLog);
 impl RecordLog {
     #[no_mangle]
     pub extern "C" fn fsrs_ScheduledCards_get(&self, r: Rating) -> SchedulingInfo {
-        let s = unsafe { &*(*self).0 };
-        SchedulingInfo(to_raw(s.get(&r.into()).unwrap().clone()))
+        SchedulingInfo(to_raw(
+            unsafe { &*(*self).0 }.get(&r.into()).unwrap().clone(),
+        ))
     }
 }
 
@@ -142,13 +133,11 @@ pub struct SchedulingInfo(*const fsrs::SchedulingInfo);
 impl SchedulingInfo {
     #[no_mangle]
     pub extern "C" fn fsrs_SchedulingInfo_card(&self) -> Card {
-        let s = unsafe { &*(*self).0 };
-        Card(to_raw(s.card.clone()))
+        Card(to_raw(unsafe { &*(*self).0 }.card.clone()))
     }
     #[no_mangle]
     pub extern "C" fn fsrs_SchedulingInfo_review_log(&self) -> ReviewLog {
-        let s = unsafe { &*(*self).0 };
-        ReviewLog(to_raw(s.review_log.clone()))
+        ReviewLog(to_raw(unsafe { &*(*self).0 }.review_log.clone()))
     }
 }
 
@@ -227,31 +216,26 @@ pub struct ReviewLog(*const fsrs::ReviewLog);
 impl ReviewLog {
     #[no_mangle]
     pub extern "C" fn fsrs_ReviewLog_rating(&self) -> Rating {
-        let r = unsafe { &*(*self).0 };
-        r.rating.into()
+        unsafe { &*(*self).0 }.rating.into()
     }
 
     #[no_mangle]
     pub extern "C" fn fsrs_ReviewLog_elapsed_days(&self) -> i64 {
-        let r = unsafe { &*(*self).0 };
-        r.elapsed_days
+        unsafe { &*(*self).0 }.elapsed_days
     }
 
     #[no_mangle]
     pub extern "C" fn fsrs_ReviewLog_scheduled_days(&self) -> i64 {
-        let r = unsafe { &*(*self).0 };
-        r.scheduled_days
+        unsafe { &*(*self).0 }.scheduled_days
     }
 
     #[no_mangle]
     pub extern "C" fn fsrs_ReviewLog_state(&self) -> State {
-        let r = unsafe { &*(*self).0 };
-        r.state.into()
+        unsafe { &*(*self).0 }.state.into()
     }
 
     #[no_mangle]
     pub extern "C" fn fsrs_ReviewLog_reviewed_date(&self) -> i64 {
-        let r = unsafe { &*(*self).0 };
-        r.reviewed_date.timestamp()
+        unsafe { &*(*self).0 }.reviewed_date.timestamp()
     }
 }
