@@ -13,6 +13,11 @@ typedef enum fsrs_Rating {
   fsrs_Rating_Easy = 4,
 } fsrs_Rating;
 
+typedef enum fsrs_Seed {
+  fsrs_Seed_Empty,
+  fsrs_Seed_Default,
+} fsrs_Seed;
+
 typedef enum fsrs_State {
   fsrs_State_New = 0,
   fsrs_State_Learning = 1,
@@ -37,6 +42,8 @@ typedef struct fsrs_Parameters {
   double decay;
   double factor;
   bool enable_short_term;
+  bool enable_fuzz;
+  enum fsrs_Seed seed;
 } fsrs_Parameters;
 #define fsrs_Parameters_DECAY -0.5
 /**
