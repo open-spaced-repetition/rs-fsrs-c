@@ -8,6 +8,10 @@ see [example](./examples/basic.c)
 
 ## Development
 
+<https://idx.google.com/import>
+
+or
+
 see [build.sh](./build.sh)
 
 ## Name conversion
