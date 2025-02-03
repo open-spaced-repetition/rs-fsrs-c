@@ -1,7 +1,16 @@
 use chrono::DateTime;
+use rs_fsrs as fsrs;
 
 #[repr(C)]
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Debug)]
+pub enum Seed {
+   // String(String), # FIXME: error: `extern` fn uses type `std::string::String`, which is not FFI-safe
+    Empty,
+    Default,
+}
+
+#[repr(C)]
+#[derive(Clone, Debug)]
 pub struct Parameters {
     pub request_retention: f64,
     pub maximum_interval: i32,
@@ -9,6 +18,8 @@ pub struct Parameters {
     pub decay: f64,
     pub factor: f64,
     pub enable_short_term: bool,
+    pub enable_fuzz: bool,
+    pub seed: Seed,
 }
 
 fn to_raw<T>(value: T) -> *const T {
@@ -24,6 +35,11 @@ impl From<Parameters> for fsrs::Parameters {
             decay: value.decay,
             factor: value.factor,
             enable_short_term: value.enable_short_term,
+            enable_fuzz: value.enable_fuzz,
+            seed: match value.seed{
+                Seed::Empty => fsrs::Seed::Empty,
+                Seed::Default => fsrs::Seed::Default,
+            },
         }
     }
 }

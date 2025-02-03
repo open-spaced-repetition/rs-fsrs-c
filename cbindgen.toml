@@ -145,7 +145,7 @@ bitflags = false
 
 [parse]
 parse_deps = true
-include = ["fsrs"]
+include = ["rs-fsrs"]
 
 
 [parse.expand]

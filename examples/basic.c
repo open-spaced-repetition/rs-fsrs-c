@@ -12,7 +12,8 @@ int main(void) {
                               0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
                         .decay = 0.0,
                         .factor = 0.0,
-                        .enable_short_term = false});
+                        .enable_short_term = false,
+                        .enable_fuzz = false});
   const fsrs_Card c = fsrs_Card_new();
   F = fsrs_Fsrs_default();
   const time_t t = time(NULL);
